@@ -22,12 +22,24 @@ exports.handler = (event, context, callback) => {
 
     var c = new Client();
     var filesToDownLoad = [];
-    var fileName;
 
-    var myFunction = function(err, stream) {
-      if (err) throw err;
-      console.log("About to Download "+fileName);
-      stream.pipe(fs.createWriteStream("temp.test"));
+
+    var downloadFile = function(path, fileName) {
+      var fullPath = path+"/"+fileName;
+      var currentFileName = fileName;
+      if (re.test(fileName))
+      {
+        console.log("Downloading "+fullPath);
+        c.get(fullPath, function(err, stream) {
+          if (err) throw err;
+
+          console.log("About to Download "+fileName);
+          stream.pipe(fs.createWriteStream("/tmp/"+fileName));
+        });
+      }
+      else {
+        console.log("Not Downloading "+fullPath);
+      }
     }
 
     c.on('ready', function() {
@@ -35,22 +47,12 @@ exports.handler = (event, context, callback) => {
         if (err) throw err;
 
         for(var i in list){
-          fileName = path+"/"+list[i].name;
-          if (re.test(fileName))
-          {
-            console.log("Downloading "+fileName);
-            c.get(fileName, myFunction);
-          }
-          else {
-            console.log("Not Downloading "+path+"/"+fileName);
-          }
+          downloadFile(path, list[i].name);
         }
 
         c.end();
       });
     });
-
-
 
     c.connect(config);
 
