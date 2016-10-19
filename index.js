@@ -20,6 +20,7 @@ exports.handler = (event, context, callback) => {
     const s3 = new AWS.S3();
 
 
+
     var c = new Client();
     var filesToDownLoad = [];
 
@@ -34,7 +35,23 @@ exports.handler = (event, context, callback) => {
           if (err) throw err;
 
           console.log("About to Download "+fileName);
-          stream.pipe(fs.createWriteStream("/tmp/"+fileName));
+          var write_stream = fs.createWriteStream("/tmp/"+fileName);
+
+          stream.pipe(write_stream);
+
+          stream.on('end',function() {
+            console.log("End Stream for "+fileName);
+            write_stream.close();
+            console.log("About to send "+fileName+" To S3");
+            var read_stream = fs.createReadStream("/tmp/"+fileName);
+            console.log("Sending "+fileName+" To S3");
+            var params = {Bucket: 'ogob-lambda-test', Key: fileName , Body: read_stream};
+            s3.putObject(params, function(err, data) {
+              console.log(err, data);
+            });
+
+          });
+
         });
       }
       else {
