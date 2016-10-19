@@ -20,10 +20,10 @@ exports.handler = (event, context, callback) => {
     const s3 = new AWS.S3();
 
 
-
-    console.log("Sending testog To S3");
-    var s3par = {Bucket: 'ogob-lambda-test', Key: "testog" , Body: "Tralala Hi Hou"};
-    s3.putObject(s3par, function(err, data) {
+    // TODO - The s3.putObject are getting stuck without that call
+    console.log("Testing if we have write permission");
+    var s3par = {Bucket: 'ogob-lambda-test'};
+    s3.headBucket(s3par, function(err, data) {
       console.log(err, data);
     });
 
@@ -46,7 +46,7 @@ exports.handler = (event, context, callback) => {
 
           stream.pipe(write_stream);
 
-          stream.on('end',function() {
+          stream.on('close',function() {
             write_stream.close();
 
             var read_stream = fs.createReadStream("/tmp/"+fileName);
