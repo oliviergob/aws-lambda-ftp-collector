@@ -7,6 +7,7 @@ exports.handler = (event, context, callback) => {
     var Client = require('ftp');
     var fs = require('fs');
 
+
     var path = event.path;
     var mask = event.mask;
     var config = event.config;
@@ -79,5 +80,13 @@ exports.handler = (event, context, callback) => {
     });
 
     c.connect(config);
+
+    callback(null, {
+        statusCode: '200',
+        body:  'OK',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
 
 };

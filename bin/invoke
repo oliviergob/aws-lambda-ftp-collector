@@ -1,0 +1,1 @@
+aws lambda invoke --function-name ftpTransferer --payload "$(cat ./test/test-request.json)" ./test/output
