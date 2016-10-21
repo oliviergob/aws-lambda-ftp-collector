@@ -9,7 +9,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "jsftp": "1.5.4"
+    "ftp": "0.3.10"
   },
   "license": "MIT"
 }

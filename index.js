@@ -4,13 +4,14 @@ console.log('Loading function');
 
 exports.handler = (event, context, callback) => {
 
-    var JSFtp = require("jsftp");
+    var Client = require('ftp');
     var fs = require('fs');
 
-    var remotePath = event.remotePath;
+
+    var path = event.path;
     var mask = event.mask;
     var config = event.config;
-    console.log('remotePath =', remotePath);
+    console.log('Path =', path);
     console.log('Mask =', mask);
 
     var re = new RegExp(mask);
@@ -20,60 +21,72 @@ exports.handler = (event, context, callback) => {
     const s3 = new AWS.S3();
 
 
-    var ftp = new JSFtp(config);
-    var filesToDownLoad = [];
-    var fileName;
-
-    var myFunction = function(err, stream) {
-      if (err) throw err;
-      console.dir("My Stream"+stream);
-      console.log("About to Download "+remotePath);
-      stream.pipe(fs.createWriteStream("/tmp/temp.test"));
-    }
-
-
-    ftp.ls(remotePath, function(err, res) {
-      res.forEach(function(file) {
-        fileName = file.name;
-        if (re.test(fileName))
-        {
-          console.log("Downloading "+fileName);
-          ftp.get(remotePath+"/"+fileName, '/tmp/'+fileName, function(hadErr) {
-            if (hadErr)
-              console.error('There was an error retrieving the file.'+hadErr);
-            else
-              console.log('File copied successfully!');
-          });
-        }
-        else {
-          console.log("Not Downloading "+fileName);
-        }
-      });
+    // TODO - The s3.putObject are getting stuck without that call
+    console.log("Testing if we have write permission");
+    var s3par = {Bucket: 'ogob-lambda-test'};
+    s3.headBucket(s3par, function(err, data) {
+      console.log(err, data);
     });
 
-  /*  c.on('ready', function() {
-      c.list(remotePath, function(err, list) {
+
+    var c = new Client();
+    var filesToDownLoad = [];
+
+
+    var downloadFile = function(path, fileName) {
+      var fullPath = path+"/"+fileName;
+      var currentFileName = fileName;
+      if (re.test(fileName))
+      {
+        console.log("Downloading "+fullPath);
+        c.get(fullPath, function(err, stream) {
+          if (err) throw err;
+
+          console.log("About to Download "+fileName);
+          var write_stream = fs.createWriteStream("/tmp/"+fileName);
+
+          stream.pipe(write_stream);
+
+          stream.on('close',function() {
+            write_stream.close();
+
+            var read_stream = fs.createReadStream("/tmp/"+fileName);
+
+            console.log("Sending "+fileName+" To S3");
+            var params = {Bucket: 'ogob-lambda-test', Key: fileName , Body: read_stream};
+            s3.putObject(params, function(err, data) {
+              console.log(err, data);
+            });
+
+          });
+
+        });
+      }
+      else {
+        console.log("Not Downloading "+fullPath);
+      }
+    }
+
+    c.on('ready', function() {
+      c.list(path, function(err, list) {
         if (err) throw err;
 
         for(var i in list){
-          fileName = remotePath+"/"+list[i].name;
-          filesToDownLoad.push({});
-          if (re.test(fileName))
-          {
-            console.log("Downloading "+fileName);
-            c.get(fileName, myFunction);
-          }
-          else {
-            console.log("Not Downloading "+fileName);
-          }
+          downloadFile(path, list[i].name);
         }
 
-        // c.end();
+        c.end();
       });
-    }); */
+    });
 
+    c.connect(config);
 
-
-  //  c.connect(config);
+    callback(null, {
+        statusCode: '200',
+        body:  'OK',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
 
 };
