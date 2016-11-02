@@ -10,7 +10,8 @@
   "main": "index.js",
   "dependencies": {
     "ftp": "0.3.10",
-    "node-lambda": "0.8.10"
+    "aws-sdk": "2.6.12",
+    "async": "2.1.2"
   },
   "license": "MIT"
 }
