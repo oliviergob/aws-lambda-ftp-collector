@@ -17,9 +17,11 @@ Testing
 =======
 I strongly recommend to use node-lamba for local development
 
-```npm install -g node-lambda
+```
+npm install -g node-lambda
 node-lambda setup
-node-lambda run```
+node-lambda run
+```
 
 API
 ===
@@ -44,6 +46,7 @@ Event
   * bucketName - S3  bucket to which the files will be downloaded to
 
 
+
   Sample
   ------
   ```
@@ -61,4 +64,5 @@ Event
           "bucketName":  "my-s3-bucket"
         }
 
-  }```
+  }
+  ```
