@@ -29,12 +29,25 @@ exports.handler = (event, context, callback) => {
 
     var downloadFile = function(file, callback) {
       var fileName = file.fileName;
+      if (fileName == 'test_02.txt')
+      {
+        fileName = 'test_02.txt.top';
+      }
       var fullPath = path+"/"+fileName;
-      var currentFileName = fileName;
 
       console.log("Downloading "+fullPath);
       c.get(fullPath, function(err, stream) {
-        if (err) callback(err);
+        if (err) {
+          console.error("Error while downlowing "+fullPath);
+          file.status = "bucketName";
+          file.error = err.message;
+          console.dir(err);
+          console.error(err);
+          //console.error(err.stack);
+          callback(null, file);
+          return;
+        }
+
 
         var write_stream = fs.createWriteStream("/tmp/"+fileName);
 
@@ -51,7 +64,9 @@ exports.handler = (event, context, callback) => {
             if (err) throw err;
 
             console.log(fileName+" sent to S3 bucket "+s3Bucket);
-            callback(null, {  fileName: fileName, size: file.size  });
+            file.status = "s3";
+            file.bucketName = s3Bucket;
+            callback(null, file);
           });
 
         });
@@ -68,19 +83,19 @@ exports.handler = (event, context, callback) => {
         for(var i in list){
           if (re.test(list[i].name))
           {
-            filesToDownload.push({fileName: list[i].name, size: list[i].size});
+            filesToDownload.push({fileName: list[i].name, size: list[i].size, status: "remote"});
           }
           else {
             console.log("Ignorninging "+list[i].name);
           }
         }
 
-        console.dir(filesToDownload);
-
-        async.map(filesToDownload, downloadFile, function(err, returnList) {
+        /*async.map(filesToDownload, downloadFile, function(err, returnList) {
           if (err) throw err;
           console.dir(returnList);
-        });
+        });*/
+
+          async.map(filesToDownload, downloadFile, terminate);
 
         c.end();
       });
@@ -93,9 +108,13 @@ exports.handler = (event, context, callback) => {
     c.connect(config);
 
     var terminate = function(err, data) {
-      console.error(err);
-      console.error(err.stack);
-      callback(err);
+      if (err)
+      {
+        console.error(err);
+        console.error(err.stack);
+      }
+
+      callback(err, data);
     }
 
 };

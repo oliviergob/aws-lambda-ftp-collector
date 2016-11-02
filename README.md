@@ -43,7 +43,7 @@ Event
     * keepalive - _integer_ - How often (in milliseconds) to send a 'dummy' (NOOP) command to keep the connection alive. **Default:** 10000
 * dest - _object_ - with the following properties:
   * type - _string_ - only s3 supported for now
-  * bucketName - S3  bucket to which the files will be downloaded to
+  * bucketName - _string_ - S3 bucket to which the files will be downloaded to
 
 
 
@@ -66,3 +66,15 @@ Event
 
   }
   ```
+
+Output
+------
+* files - _array_ - array of objects with the following properties
+  * fileName - _string_
+  * size - _number_ - In Bytes
+  * status - _string_ - with one of the following
+    * s3 - The file has been succesfully downloaded to S3
+    * ftp_error - An error occured when downloading the file
+    * s3_error - The file could be downloaded but an error occured while uploading it to s3
+  * error - _string_ - error short description
+  * bucketName - _string_ - S3 bucket to where the file is stored
