@@ -1,3 +1,6 @@
 dist
 node_modules
 test
+.env
+deploy.env
+event.json

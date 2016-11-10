@@ -9,7 +9,9 @@
   },
   "main": "index.js",
   "dependencies": {
-    "ftp": "0.3.10"
+    "ftp": "0.3.10",
+    "aws-sdk": "2.6.12",
+    "async": "2.1.2"
   },
   "license": "MIT"
 }
