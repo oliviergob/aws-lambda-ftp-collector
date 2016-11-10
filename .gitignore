@@ -1,6 +1,6 @@
-dist
-node_modules
-test
-.env
-deploy.env
-event.json
+**/dist
+**/node_modules
+**/test
+**/.env
+**/deploy.env
+**/event.json
