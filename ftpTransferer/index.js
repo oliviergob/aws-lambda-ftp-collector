@@ -29,7 +29,13 @@ exports.handler = (event, context, callback) => {
         if (err) {
           console.error("Error while downlowing "+fullPath);
           console.error(err);
-          callback(err);
+          var myErrorObj = {
+              errorType : "InternalServerError",
+              httpStatus : 500,
+              requestId : context.awsRequestId,
+              message : "Error while downlowing "+fullPath+" "+err
+          }
+          callback(JSON.stringify(myErrorObj));
           return;
         }
 
@@ -40,17 +46,28 @@ exports.handler = (event, context, callback) => {
 
         stream.on('close',function() {
           write_stream.close();
+          var fileSize = write_stream.bytesWritten;
 
           var read_stream = fs.createReadStream("/tmp/"+fileName);
 
           console.log("Sending "+fileName+" To S3 bucket "+s3Bucket);
           var params = {Bucket: s3Bucket, Key: fileName , Body: read_stream};
           s3.putObject(params, function(err, data) {
-            if (err) throw err;
-
+            if (err) {
+              console.error("Error while uploading "+fullPath+" to s3 bucket "+s3Bucket);
+              console.error(err);
+              var myErrorObj = {
+                  errorType : "InternalServerError",
+                  httpStatus : 500,
+                  requestId : context.awsRequestId,
+                  message : "Error while uploading "+fullPath+" to s3 bucket "+s3Bucket+": "+err
+              }
+              callback(JSON.stringify(myErrorObj));
+            }
             console.log(fileName+" sent to S3 bucket "+s3Bucket);
             file.status = "s3";
             file.bucketName = s3Bucket;
+            file.size = fileSize;
             callback(null, file);
           });
 
@@ -61,19 +78,17 @@ exports.handler = (event, context, callback) => {
     });
 
     c.on('error', (err) => {
-      terminate(err, null);
+      console.error("Error whith ftp connection");
+      console.error(err);
+      var myErrorObj = {
+          errorType : "InternalServerError",
+          httpStatus : 500,
+          requestId : context.awsRequestId,
+          message : "Error whith ftp connection: "+err
+      }
+      callback(JSON.stringify(myErrorObj));
     });
 
     c.connect(config);
-
-    var terminate = function(err, data) {
-      if (err)
-      {
-        console.error(err);
-        console.error(err.stack);
-      }
-
-      callback(err, data);
-    }
 
 };
