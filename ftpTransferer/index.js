@@ -6,6 +6,7 @@ exports.handler = (event, context, callback) => {
     var Client = require('ftp');
     var fs = require('fs');
 
+
     var file = event.file;
     var fileName = file.fileName;
     var path = file.path;
@@ -15,7 +16,7 @@ exports.handler = (event, context, callback) => {
 
     const AWS = require('aws-sdk');
     console.log('Creating S3 connection');
-    const s3 = new AWS.S3();
+    var s3Stream = require('s3-upload-stream')(new AWS.S3());
     console.log('Creating ftp connection');
     var c = new Client();
 
@@ -39,38 +40,37 @@ exports.handler = (event, context, callback) => {
           return;
         }
 
+        var upload = s3Stream.upload({
+          "Bucket": s3Bucket,
+          "Key": fileName
+        });
 
-        var write_stream = fs.createWriteStream("/tmp/"+fileName);
+        upload.on('error', (err) => {
+          console.error("Error whith S3 upload");
+          console.error(err);
+          var myErrorObj = {
+              errorType : "InternalServerError",
+              httpStatus : 500,
+              requestId : context.awsRequestId,
+              message : "Error whith S3 upload: "+err
+          }
+          callback(JSON.stringify(myErrorObj));
+        });
 
-        stream.pipe(write_stream);
+
+        upload.on('uploaded', function (details) {
+          console.log(details);
+          console.log(fileName+" sent to S3 bucket "+s3Bucket+" with size "+upload.uploadedSize);
+          file.status = "s3";
+          file.bucketName = s3Bucket;
+          callback(null, file);
+        });
+
+        stream.pipe(upload);
 
         stream.on('close',function() {
-          write_stream.close();
-          var fileSize = write_stream.bytesWritten;
-
-          var read_stream = fs.createReadStream("/tmp/"+fileName);
-
-          console.log("Sending "+fileName+" To S3 bucket "+s3Bucket);
-          var params = {Bucket: s3Bucket, Key: fileName , Body: read_stream};
-          s3.putObject(params, function(err, data) {
-            if (err) {
-              console.error("Error while uploading "+fullPath+" to s3 bucket "+s3Bucket);
-              console.error(err);
-              var myErrorObj = {
-                  errorType : "InternalServerError",
-                  httpStatus : 500,
-                  requestId : context.awsRequestId,
-                  message : "Error while uploading "+fullPath+" to s3 bucket "+s3Bucket+": "+err
-              }
-              callback(JSON.stringify(myErrorObj));
-            }
-            console.log(fileName+" sent to S3 bucket "+s3Bucket);
-            file.status = "s3";
-            file.bucketName = s3Bucket;
-            file.size = fileSize;
-            callback(null, file);
-          });
-
+          // TODO - not sure this is always going to be called
+          file.size = stream.bytesRead
         });
 
       });
