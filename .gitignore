@@ -4,3 +4,4 @@
 **/.env
 **/deploy.env
 **/event.json
+**/build

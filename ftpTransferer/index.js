@@ -6,12 +6,17 @@ exports.handler = (event, context, callback) => {
     var Client = require('ftp');
     var fs = require('fs');
 
+    var message = JSON.parse(event.Records[0].Sns.Message);
+    console.log('Message received from SNS:', message);
 
-    var file = event.file;
+    console.dir(message);
+
+
+    var file = message.file;
     var fileName = file.fileName;
     var path = file.path;
-    var config = event.source;
-    var s3Bucket = event.dest.bucketName;
+    var config = message.source;
+    var s3Bucket = message.dest.bucketName;
     console.log('Path =', path);
 
     const AWS = require('aws-sdk');
