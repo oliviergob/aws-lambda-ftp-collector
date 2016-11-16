@@ -27,30 +27,6 @@ exports.handler = (event, context, callback) => {
       "Key": fileName
     });
 
-    upload.on('error', (err) => {
-      console.error("Error whith S3 upload");
-      console.error(err);
-      var myErrorObj = {
-          errorType : "InternalServerError",
-          httpStatus : 500,
-          requestId : context.awsRequestId,
-          message : "Error whith S3 upload: "+err
-      }
-      callback(JSON.stringify(myErrorObj));
-      return;
-    });
-
-
-    upload.on('uploaded', function (details) {
-      console.log(fileName+" sent to S3 bucket "+s3Bucket+" with size "+file.size);
-      file.status = "s3";
-      file.bucketName = s3Bucket;
-      callback(null, file);
-      upload.close();
-      c.close();
-      console.log("I just called the callback Method but I am still running");
-      return;
-    });
 
 
 
@@ -69,12 +45,44 @@ exports.handler = (event, context, callback) => {
               requestId : context.awsRequestId,
               message : "Error while downlowing "+fullPath+" "+err
           }
+          c.end();
+          upload.end();
           callback(JSON.stringify(myErrorObj));
           return;
         }
 
 
         stream.pipe(upload);
+
+        upload.on('error', (err) => {
+          console.error("Error whith S3 upload");
+          console.error(err);
+          var myErrorObj = {
+              errorType : "InternalServerError",
+              httpStatus : 500,
+              requestId : context.awsRequestId,
+              message : "Error whith S3 upload: "+err
+          }
+          stream.end();
+          c.end();
+          upload.end();
+          callback(JSON.stringify(myErrorObj));
+          return;
+        });
+
+
+        upload.on('uploaded', function (details) {
+          console.log(fileName+" sent to S3 bucket "+s3Bucket+" with size "+file.size);
+          file.status = "s3";
+          file.bucketName = s3Bucket;
+          stream.end();
+          c.end();
+          upload.end();
+          callback(null, file);
+          console.log("I just called the callback Method but I am still running");
+          return;
+        });
+
 
         stream.on('close',function() {
           // TODO - not sure this is always going to be called
@@ -96,6 +104,7 @@ exports.handler = (event, context, callback) => {
           requestId : context.awsRequestId,
           message : "Error whith ftp connection: "+err
       }
+      c.end();
       callback(JSON.stringify(myErrorObj));
       return;
     });
