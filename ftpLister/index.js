@@ -32,13 +32,12 @@ exports.handler = (event, context, callback) => {
       var fullPath = path+"/"+fileName;
 
 
-      var file = {path : path, fileName : fileName}
-      delete event.path;
-      delete event.mask;
-      event.file = file;
+      var message = {file:{path : path, fileName : fileName}, source: event.source, dest: event.dest};
+
+      console.log("Sending "+fileName+" to SNS queue");
 
       var params = {
-          Message: JSON.stringify(event),
+          Message: JSON.stringify(message),
           TopicArn: "arn:aws:sns:us-east-1:546190104433:FILES_TO_FTP_COLLECT"
       };
       sns.publish(params, callback);
