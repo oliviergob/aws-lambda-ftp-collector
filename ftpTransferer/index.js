@@ -6,6 +6,8 @@ exports.handler = (event, context, callback) => {
     var Client = require('ftp');
     var fs = require('fs');
 
+    console.log("WTF "+event);
+
     var message = JSON.parse(event.Records[0].Sns.Message);
     console.log('Message received from SNS:', message);
 

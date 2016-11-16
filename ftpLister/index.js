@@ -9,6 +9,7 @@ exports.handler = (event, context, callback) => {
     var async = require("async");
 
 
+
     var path = event.path;
     var mask = event.mask;
     var config = event.source;
@@ -20,7 +21,7 @@ exports.handler = (event, context, callback) => {
 
     const AWS = require('aws-sdk');
     var c = new Client();
-
+    var sns = new AWS.SNS();
 
     var downloadFile = function(file, callback) {
       var fileName = file.fileName;
@@ -31,12 +32,16 @@ exports.handler = (event, context, callback) => {
       var fullPath = path+"/"+fileName;
 
 
-      // TODO - Do Something
+      var file = {path : path, fileName : fileName}
+      delete event.path;
+      delete event.mask;
+      event.file = file;
 
-      console.log(fileName+" will be collected by ftp collector");
-      file.status = "s3";
-      file.bucketName = s3Bucket;
-      callback(null, file);
+      var params = {
+          Message: JSON.stringify(event),
+          TopicArn: "arn:aws:sns:us-east-1:546190104433:FILES_TO_FTP_COLLECT"
+      };
+      sns.publish(params, callback);
 
     }
 
