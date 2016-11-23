@@ -25,14 +25,10 @@ exports.handler = (event, context, callback) => {
 
     var downloadFile = function(file, callback) {
       var fileName = file.fileName;
-      if (fileName == 'test_02.txt')
-      {
-        fileName = 'test_02.txt.top';
-      }
       var fullPath = path+"/"+fileName;
 
 
-      var message = {file:{path : path, fileName : fileName}, source: event.source, dest: event.dest};
+      var message = {file:{path : path, fileName : fileName, size : file.size}, source: event.source, dest: event.dest};
 
       console.log("Sending "+fileName+" to SNS queue");
 

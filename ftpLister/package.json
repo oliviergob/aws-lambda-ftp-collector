@@ -1,7 +1,7 @@
 {
-  "name": "gobs-lambda-transferer",
+  "name": "LambdaFtpLister",
   "version": "0.0.1",
-  "description": "An example module to illustrate the usage of a package.json",
+  "description": "A lambda function to list files on a FTP server matching a file mask, files are sent downstream to a collect function via AWS SNS",
   "author": "Olivier Gobilliard  <olivier.gob@gmail.com>",
   "repository": {
   "type": "git",
