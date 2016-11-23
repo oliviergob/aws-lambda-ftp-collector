@@ -1,6 +1,6 @@
 **/dist
 **/node_modules
-**/test
+**/tests
 **/.env
 **/deploy.env
 **/event.json
