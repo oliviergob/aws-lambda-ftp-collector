@@ -7,14 +7,19 @@ exports.handler = (event, context, callback) => {
     var Client = require('ftp');
     var fs = require('fs');
 
-    var message = JSON.parse(event.Records[0].Sns.Message);
+    console.dir(event.Records[0].dynamodb.NewImage);
 
+    //var message = JSON.parse(event.Records[0].Sns.Message);
+    var message = event.Records[0].dynamodb.NewImage;
 
     var file = message.file;
+    console.log("File: "+file);
     var fileName = file.fileName;
+    console.log("fileName: "+fileName);
     var fileSize = file.size;
     var path = file.path;
     var config = message.source;
+    console.dir(config);
     var s3Bucket = message.dest.bucketName;
 
     const AWS = require('aws-sdk');

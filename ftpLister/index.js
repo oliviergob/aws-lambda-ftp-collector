@@ -28,16 +28,27 @@ exports.handler = (event, context, callback) => {
       var fullPath = path+"/"+fileName;
 
 
-      var message = {file:{path : path, fileName : fileName, size : file.size}, source: event.source, dest: event.dest};
 
-      console.log("Sending "+fileName+" to SNS queue");
+      var message = {FullFileName: path+"/"+fileName, file:{path : path, fileName : fileName, size : file.size}, source: event.source, dest: event.dest};
+
+      var docClient = new AWS.DynamoDB.DocumentClient();
+
+      var params = {
+          TableName: "FTP_FILES_TO_COLLECT",
+          Item: message
+      };
+
+      console.log("Sending "+fileName+" to dynamoDb");
+      docClient.put(params, callback);
+
+    /*  console.log("Sending "+fileName+" to SNS queue");
 
       var params = {
           Message: JSON.stringify(message),
           TopicArn: "arn:aws:sns:us-east-1:546190104433:FILES_TO_FTP_COLLECT"
       };
       sns.publish(params, callback);
-
+*/
     }
 
     c.on('ready', function() {
