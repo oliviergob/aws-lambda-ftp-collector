@@ -1,13 +1,16 @@
 Description
 ===========
 
-lambda-transferer is a lambda function to collect files via FTP into an AWS S3 bucket
+lambda-ftp-collector is a set of AWS Lambda function to collect files via FTP into an AWS S3 bucket
 
 Origin of the project
 =====================
 
-The vast majority of IT projects I have been involved with starts by collecting a set of data from a customer, on a regular basis or as a one off.
-Each project implements its own solution to collect the data. I want to provide a set of standard tools to achieve this in a cheap and effective manner.
+The vast majority of IT projects I have been involved with starts by collecting a set of data from a customer, on a regular basis or as a one off. Often via SFTP, more rarely via FTP.
+Amazon provides some good tools for ingesting data (Kinesis), but it assumes that the data is being sent and not collected.
+
+I wanted to create a set of tool easyli configurable to collect files via FTP / SFTP.
+It is also a pretext for me to experiment with Lambda and NodeJS.
 
 Version
 =======
@@ -22,6 +25,17 @@ npm install -g node-lambda
 node-lambda setup
 node-lambda run
 ```
+
+
+Architecture
+=======
+The ftpLister function takes a path, a file mask a bucket name and a sourceId to reference FTP address and credentials as paramteres.
+It will list all the files matching the file mask and write an entry in a DynamoDb table for each of them.
+
+The ftpTransferer function takes a path, a file name, a bucket name and a sourceId to reference FTP address and credentials as paramteres.
+It will download the file and upload it or stream it to the s3 bucket. Files are downloaded to /tmp and uploaded to S3 if less than 50Mb, they are streamed directly to the bucket if larger.
+
+=======
 
 API
 ===
