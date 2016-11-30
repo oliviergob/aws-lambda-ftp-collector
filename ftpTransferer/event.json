@@ -1,0 +1,14 @@
+{ "Records":
+  [ {"eventID": "1cde1c0038b35ca679e9ca4d18c30fdd",
+      "eventName": "INSERT",
+      "eventVersion": "1.1",
+      "eventSource": "aws:dynamodb",
+      "awsRegion": "us-east-1",
+      "dynamodb": {
+        "ApproximateCreationDateTime": "1479945180",
+        "Keys": { "FullFileName": { "S": "/tmp/test/test_02.txt" } },
+          "NewImage": { "payload": {"S": "{\"file\": {                  \"path\": \"/tmp/test\",                 \"size\": \"52428801\",                  \"fileName\": \"test_02.txt\"                },                \"sourceId\": \"TRANSFER_01\",                \"dest\": {                      \"type\":  \"s3\",                      \"bucketName\":  \"ogob-lambda-test\"                    }              }" }  }
+      }
+    }
+  ]
+}

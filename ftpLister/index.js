@@ -8,11 +8,13 @@ exports.handler = (event, context, callback) => {
     var fs = require('fs');
     var async = require("async");
 
-
-
     var path = event.path;
     var mask = event.mask;
-    var config = event.source;
+    var config = {
+      host: process.env[event.sourceId+"_FTP_SERVER"],
+      user: process.env[event.sourceId+"_FTP_USER"],
+      password: process.env[event.sourceId+"_PASSWORD"]
+    };
     var s3Bucket = event.dest.bucketName;
     console.log('Path =', path);
     console.log('Mask =', mask);
@@ -29,7 +31,7 @@ exports.handler = (event, context, callback) => {
 
 
 
-      var message = {FullFileName: path+"/"+fileName, file:{path : path, fileName : fileName, size : file.size}, source: event.source, dest: event.dest};
+      var message = {FullFileName: path+"/"+fileName, payload: JSON.stringify({file: {path : path, fileName : fileName, size : file.size}, sourceId: event.sourceId, dest: event.dest}) };
 
       var docClient = new AWS.DynamoDB.DocumentClient();
 

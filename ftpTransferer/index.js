@@ -7,19 +7,55 @@ exports.handler = (event, context, callback) => {
     var Client = require('ftp');
     var fs = require('fs');
 
-    console.dir(event.Records[0].dynamodb.NewImage);
+    // We only care about INSERT events
+    if (event.Records[0].eventName != "INSERT" && event.Records[0].eventName != "MODIFY")
+    {
+      message = event.Records[0].eventName + " Not an INSERT event, nothing to do"
+      console.log(message);
+      var response = {
+          statusCode: 200,
+          body: JSON.stringify(message)
+      };
+      callback(null, JSON.stringify(response));
+      return;
+    }
+
+    var newImage = event.Records[0].dynamodb.NewImage;
+
+    if (!newImage)
+    {
+      console.log("No new image, nothing to do");
+      var response = {
+          statusCode: 200,
+          body: JSON.stringify("No new image, nothing to do")
+      };
+      callback(null, JSON.stringify(response));
+      return;
+    }
+
+    if (!newImage.payload)
+    {
+      var myErrorObj = {
+          errorType : "InternalServerError",
+          httpStatus : 500,
+          requestId : context.awsRequestId,
+          message : "no payload received, swallowing message"
+      }
+      callback(null, JSON.stringify(myErrorObj));
+    }
 
     //var message = JSON.parse(event.Records[0].Sns.Message);
-    var message = event.Records[0].dynamodb.NewImage;
+    var message = JSON.parse(newImage.payload.S);
 
     var file = message.file;
-    console.log("File: "+file);
     var fileName = file.fileName;
-    console.log("fileName: "+fileName);
     var fileSize = file.size;
     var path = file.path;
-    var config = message.source;
-    console.dir(config);
+    var config = {
+      host: process.env[message.sourceId+"_FTP_SERVER"],
+      user: process.env[message.sourceId+"_FTP_USER"],
+      password: process.env[message.sourceId+"_PASSWORD"]
+    };
     var s3Bucket = message.dest.bucketName;
 
     const AWS = require('aws-sdk');
