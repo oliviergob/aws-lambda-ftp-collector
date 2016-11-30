@@ -23,7 +23,8 @@ I strongly recommend to use node-lamba for local development
 ```
 npm install -g node-lambda
 node-lambda setup
-node-lambda run
+node-lambda -f deploy.env run
+node-lambda -f deploy.env deploy
 ```
 
 
@@ -35,9 +36,9 @@ It will list all the files matching the file mask and write an entry in a Dynamo
 The ftpTransferer function takes a path, a file name, a bucket name and a sourceId to reference FTP address and credentials as paramteres.
 It will download the file and upload it or stream it to the s3 bucket. Files are downloaded to /tmp and uploaded to S3 if less than 50Mb, they are streamed directly to the bucket if larger.
 
-=======
 
-API
+
+API TO BE UPDATED
 ===
 
 Event
