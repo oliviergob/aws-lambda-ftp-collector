@@ -1,5 +1,5 @@
 {
-  "path": "/tmp/volumes",
+  "path": "/tmp/test",
   "mask": ".*\\.txt",
   "sourceId": "TRANSFER_01",
   "dest": {

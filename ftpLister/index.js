@@ -23,7 +23,6 @@ exports.handler = (event, context, callback) => {
 
     const AWS = require('aws-sdk');
     var c = new Client();
-    var sns = new AWS.SNS();
 
     var downloadFile = function(file, callback) {
       var fileName = file.fileName;
@@ -43,14 +42,6 @@ exports.handler = (event, context, callback) => {
       console.log("Sending "+fileName+" to dynamoDb");
       docClient.put(params, callback);
 
-    /*  console.log("Sending "+fileName+" to SNS queue");
-
-      var params = {
-          Message: JSON.stringify(message),
-          TopicArn: "arn:aws:sns:us-east-1:546190104433:FILES_TO_FTP_COLLECT"
-      };
-      sns.publish(params, callback);
-*/
     }
 
     c.on('ready', function() {
