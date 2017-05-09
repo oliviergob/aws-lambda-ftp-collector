@@ -1,20 +1,33 @@
 Description
 ===========
 
-lambda-ftp-collector is a set of AWS Lambda function to collect files via FTP into an AWS S3 bucket
+lambda-ftp-collector was a learning exercise, an occasion for myself to learn Lambda and NodeJs.
+It is composed of a set of AWS Lambda function to collect files via FTP into an AWS S3 bucket.
+
 
 Origin of the project
 =====================
 
-The vast majority of IT projects I have been involved with starts by collecting a set of data from a customer, on a regular basis or as a one off. Often via SFTP, more rarely via FTP.
+A large number of IT projects I have been involved with starts by collecting a set of files from a customer, on a regular basis or as a one off. Often via SFTP, more rarely via FTP.
 Amazon provides some good tools for ingesting data (Kinesis), but it assumes that the data is being sent and not collected.
 
-I wanted to create a set of tool easyli configurable to collect files via FTP / SFTP.
+I wanted to create a set of tool easily configurable to collect files via FTP / SFTP.
 It is also a pretext for me to experiment with Lambda and NodeJS.
 
-Version
-=======
-0.0.1 - unstable - currently being developed
+Requirements:
+================================
+
+* Download files matching a file mask from a (S)FTP server into a S3 Bucket
+* Handle large number of files (tens of thousands)
+* Be reliable (retry when FTP is not available)
+
+
+Why has the project been stopped
+================================
+
+In retrospect, the use case I picked, SFTP file download, is not really suited for Lambda.
+Lambda offer very little control on its concurrency and this quickly became a problem. When dealing with large number of files, too many connections would be open, flooding the SFTP server.
+
 
 Testing
 =======
