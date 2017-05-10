@@ -81,7 +81,7 @@ Event
     "sourceId": "TRANSFER_01",
     "dest": {
           "type":  "s3",
-          "bucketName":  "ogob-lambda-test"
+          "bucketName":  "ogob-la mbda-test"
         }
 
   }
