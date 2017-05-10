@@ -2,7 +2,7 @@ Description
 ===========
 
 lambda-ftp-collector was a learning exercise, an occasion for myself to learn Lambda and NodeJs.
-It is composed of a set of AWS Lambda function to collect files via FTP into an AWS S3 bucket.
+It is composed of a set of AWS Lambda functions that collect files via FTP into an AWS S3 bucket.
 
 
 Origin of the project
@@ -19,22 +19,24 @@ Requirements:
 
 * Download files matching a file mask from a (S)FTP server into a S3 Bucket
 * Handle large number of files (tens of thousands)
-* Be reliable (retry when FTP is not available)
+* Be reliable (retry when server is not available)
 
 
 Why has the project been stopped
 ================================
 
-In retrospect, the use case I picked, SFTP file download, is not really suited for Lambda.
-Lambda offer very little control on its concurrency and this quickly became a problem. When dealing with large number of files, too many connections would be open, flooding the SFTP server.
+In retrospect, the use case I picked, (S)FTP file download, is not really suited for Lambda.
+Lambda offer very little control on its concurrency and this quickly became a problem. When dealing with large number of files, too many connections would be open, flooding the (S)FTP server.
+
+Only the FTP transfer has been coded, no SFTP.
 
 
 Architecture
 ===========
 The ftpLister function takes a path, a file mask a bucket name and a sourceId to reference FTP address and credentials as paramteres.
-It will list all the files matching the file mask and write an entry in a DynamoDb table for each of them.
+It will list all the files matching the mask and write an entry in a DynamoDb table for each of them.
 
-The ftpTransferer function takes a path, a file name, a bucket name and a sourceId to reference FTP address and credentials as paramteres.
+The ftpTransferer get triggered by the DynamoDb events. The function takes a path, a file name, a bucket name and a sourceId to reference FTP address and credentials as paramteres.
 It will download the file and upload it or stream it to the s3 bucket. Files are downloaded to /tmp and uploaded to S3 if less than 50Mb, they are streamed directly to the bucket if larger.
 
 
