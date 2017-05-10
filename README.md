@@ -45,8 +45,11 @@ FTP server credentials
 
 FTP server addresses and credentials have to be sotred within the functions environment variables (which are encrypted by Amazon).
 Three variables environment variables are required to configure one transfer:
+
 <TRANSFER_ID>_FTP_SERVER
+
 <TRANSFER_ID>_FTP_USER
+
 <TRANSFER_ID>_PASSWORD
 
 E.G.:
